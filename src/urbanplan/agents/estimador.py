@@ -9,17 +9,18 @@ def create_estimador_agent(bq_project_id: str, model: str = "gemini-2.5-flash") 
 
     bq_tool = BigQueryEstimatorTool(project_id=bq_project_id)
 
+    # Nombre completo de la tabla, construido dinámicamente con el proyecto del .env
+    tabla = f"{bq_project_id}.agente_urbanistico.licencias_historicas"
+
     def query_historical_data(query: str) -> str:
         """
         Ejecuta una consulta SQL de solo lectura (SELECT) contra la base de datos historica
         de licencias urbanisticas y devuelve los resultados en formato de texto.
-        Solo acepta sentencias SELECT. Ejemplo de uso:
-        SELECT * FROM `bigquery-public-data.chicago_taxi_trips.taxi_trips` LIMIT 5
+        Solo acepta sentencias SELECT.
         """
         result = bq_tool.execute_read_only_query(query)
         if not result:
             return "La consulta no devolvio resultados."
-        # Formateamos como texto legible
         output_lines = []
         for row in result[:20]:  # Mostramos max 20 filas al LLM
             output_lines.append(str(row))
@@ -32,7 +33,7 @@ def create_estimador_agent(bq_project_id: str, model: str = "gemini-2.5-flash") 
         instruction=(
             "Eres un arquitecto tecnico experto en calculos de presupuestos y plazos de obra. "
             "Tienes acceso a una base de datos historica de licencias en BigQuery. "
-            "La tabla principal es: `mlops-entrega.agente_urbanistico.licencias_historicas` "
+            f"La tabla principal es: `{tabla}` "
             "con columnas: tipo_obra, municipio, presupuesto_euros, tasa_licencia_euros, dias_tramitacion, metros_cuadrados, anio. "
             "Cuando el usuario pregunte sobre costes o plazos, SIEMPRE consulta esa tabla con tu herramienta "
             "'query_historical_data' antes de responder. "
@@ -41,8 +42,8 @@ def create_estimador_agent(bq_project_id: str, model: str = "gemini-2.5-flash") 
             "(ej. metros_cuadrados BETWEEN 200 AND 300) para asegurar que encuentras obras similares en la base de datos historica. "
             "Usa comodines (LIKE '%Local%') si no conoces el tipo_obra exacto. "
             "Ejemplo de consulta util: "
-            "SELECT tipo_obra, AVG(tasa_licencia_euros) as tasa_media, AVG(dias_tramitacion) as dias_medios "
-            "FROM `mlops-entrega.agente_urbanistico.licencias_historicas` "
+            f"SELECT tipo_obra, AVG(tasa_licencia_euros) as tasa_media, AVG(dias_tramitacion) as dias_medios "
+            f"FROM `{tabla}` "
             "WHERE metros_cuadrados BETWEEN 1000 AND 2000 AND municipio = 'Zaragoza' GROUP BY tipo_obra "
             "Si la consulta falla, proporciona una estimacion basada en el conocimiento del sector."
             "\n\nMUY IMPORTANTE: Tienes acceso a la herramienta 'generate_permit_dossier'. Si el usuario pide un informe o dossier, ÚSALA para guardar los datos."
