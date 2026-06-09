@@ -35,11 +35,15 @@ def create_estimador_agent(bq_project_id: str, model: str = "gemini-2.5-flash") 
             "con columnas: tipo_obra, municipio, presupuesto_euros, tasa_licencia_euros, dias_tramitacion, metros_cuadrados, anio. "
             "Cuando el usuario pregunte sobre costes o plazos, SIEMPRE consulta esa tabla con tu herramienta "
             "'query_historical_data' antes de responder. "
+            "REGLA MUY IMPORTANTE: Si el usuario te pide informacion para una obra de un tamano o presupuesto exacto (ej. 250 metros), "
+            "NUNCA filtres con `=` en SQL (ej. metros_cuadrados = 250). En su lugar, usa SIEMPRE rangos amplios con `BETWEEN` "
+            "(ej. metros_cuadrados BETWEEN 200 AND 300) para asegurar que encuentras obras similares en la base de datos historica. "
+            "Usa comodines (LIKE '%Local%') si no conoces el tipo_obra exacto. "
             "Ejemplo de consulta util: "
             "SELECT tipo_obra, AVG(tasa_licencia_euros) as tasa_media, AVG(dias_tramitacion) as dias_medios "
             "FROM `mlops-entrega.agente_urbanistico.licencias_historicas` "
-            "WHERE presupuesto_euros BETWEEN 300000 AND 500000 GROUP BY tipo_obra "
-            "Si la consulta falla, proporciona una estimacion basada en el conocimiento del sector espanol."
+            "WHERE metros_cuadrados BETWEEN 200 AND 300 AND municipio = 'Barcelona' GROUP BY tipo_obra "
+            "Si la consulta falla, proporciona una estimacion basada en el conocimiento del sector."
         ),
         tools=[query_historical_data]
     )
