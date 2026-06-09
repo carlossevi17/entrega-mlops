@@ -77,12 +77,15 @@ Instala todas las dependencias exactamente como están definidas en la arquitect
 uv sync --frozen
 ```
 
-### 2. Poblar la Base de Datos (Data Engineering)
-Antes de preguntar por costes, hay que inyectar el dataset histórico en el proyecto de BigQuery:
+### 2. Poblar la Base de Datos (Solo si cambias de proyecto GCP)
+La base de datos ya se encuentra desplegada y poblada con 100 registros en el proyecto original (`mlops-entrega`). 
+**No hace falta ejecutar nada si mantienes ese proyecto y tienes acceso.**
+
+Sin embargo, si clonas este repositorio y configuras en el `.env` un `GOOGLE_CLOUD_PROJECT` **nuevo o distinto**, debes inicializar la base de datos ejecutando el script de Data Engineering:
 ```bash
 uv run python setup_bigquery.py
 ```
-*(Se conectará a tu GCP, creará el dataset `agente_urbanistico` y la tabla `licencias_historicas`, inyectando 100 registros realistas para las pruebas).*
+*(Esto se conectara a tu nuevo GCP, creara el dataset `agente_urbanistico` y la tabla, inyectando los 100 registros realistas para que el agente pueda funcionar).*
 
 ### 3. Arrancar el Agente ADK
 Levanta el servidor local de agentes:
