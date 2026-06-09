@@ -1,0 +1,47 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
+
+jobs:
+  test-and-lint:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: ⚡ Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "latest"
+          enable-cache: true
+
+      - name: 📦 Install Dependencies
+        run: |
+          uv sync --frozen
+          uv pip check
+
+      - name: 🔍 Syntax Check
+        run: |
+          # Solo verifica que los scripts principales de los agentes no tienen errores de sintaxis fatales
+          python -m py_compile src/urbanplan/agent.py
+          python -m py_compile src/urbanplan/supervisor/supervisor.py
+          python -m py_compile src/urbanplan/agents/estimador.py
+          python -m py_compile src/urbanplan/agents/normativo.py
+          python -m py_compile setup_bigquery.py
+          
+      - name: ✅ Success Validation
+        run: echo "El codigo se empaqueta correctamente y no hay errores de sintaxis en los agentes."
