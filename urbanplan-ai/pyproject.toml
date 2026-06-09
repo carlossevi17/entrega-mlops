@@ -1,0 +1,17 @@
+[project]
+name = "urbanplan-ai"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "faiss-cpu>=1.14.2",
+    "google-adk>=1.1.1",
+    "google-genai>=2.6.0",
+    "jupyter>=1.1.1",
+    "llama-index>=0.14.22",
+    "llama-index-vector-stores-faiss>=0.6.0",
+    "mcp>=1.27.1",
+    "pydantic>=2.13.4",
+    "pypdf>=6.12.2",
+]
