@@ -13,7 +13,6 @@ RUN uv sync --frozen
 
 # Copiar el codigo fuente
 COPY src/ ./src/
-COPY data/ ./data/
 
 # Variables de entorno
 ENV PYTHONUNBUFFERED=1
