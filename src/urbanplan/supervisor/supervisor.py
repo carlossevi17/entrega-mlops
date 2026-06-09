@@ -1,41 +1,42 @@
-# src/urbanplan/supervisor/agent.py
+# src/urbanplan/supervisor/supervisor.py
 import os
-from adk.agents import Agent
-from adk.tools import AgentTool, McpTool
+from google.adk.agents import Agent
 from urbanplan.agents.normativo import create_normativo_agent
 from urbanplan.agents.estimador import create_estimador_agent
+from urbanplan.mcp_server.dossier_tool import generate_permit_dossier
 
-def create_supervisor(index_path: str, bq_project_id: str, provider: str = "gemini") -> Agent:
-    """Orquesta el sistema delegando en sub-agentes y herramientas MCP."""
-    
-    # 1. Instanciar los sub-agentes
-    normativo = create_normativo_agent(index_path, provider)
-    estimador = create_estimador_agent(bq_project_id, provider)
-    
-    # Envolverlos como herramientas
-    tool_normativo = AgentTool(agent=normativo)
-    tool_estimador = AgentTool(agent=estimador)
-    
-    # 2. Conectar el Servidor MCP (Infraestructura MCP)
-    # Se conecta mediante la entrada estándar (stdio) lanzando el script en un subproceso
-    mcp_server_path = os.path.abspath(os.path.join(os.getcwd(), "src", "urbanplan", "mcp_server", "server.py"))
-    mcp_dossier_tool = McpTool(
-        command="uv",
-        args=["run", "python", mcp_server_path]
-    )
-    
-    # 3. Crear el Supervisor
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+
+
+def create_supervisor(bq_project_id: str, model: str = "gemini-2.5-flash") -> Agent:
+    """Orquesta el sistema delegando en sub-agentes especializados."""
+
+    # 1. Instanciar sub-agentes
+    normativo = create_normativo_agent(model)
+    estimador = create_estimador_agent(bq_project_id, model)
+
+    # 2. Crear el Supervisor con sub_agents y la herramienta MCP directa
     return Agent(
         name="supervisor_urbanplan",
-        model_provider=provider,
-        system_instruction=(
-            "Eres el director de una consultora urbanística. Trabajas orquestando a tu equipo:\n"
-            "1. Usa 'agente_normativo' para resolver dudas de viabilidad legal y normativa.\n"
-            "2. Usa 'agente_estimador' para calcular plazos y presupuestos históricos.\n"
-            "3. Cuando el usuario te pida el INFORME o DOSSIER FINAL, debes asegurarte de tener "
-            "tanto la viabilidad legal como las estimaciones. Una vez tengas esa información, "
-            "usa la herramienta MCP 'generate_permit_dossier' para generar el archivo físico. "
-            "Informa siempre al usuario de la ruta donde se ha guardado su documento."
+        model=model,
+        description="Director de consultoria urbanistica UrbanPlan AI.",
+        instruction=(
+            "Eres el director de una consultora urbanistica llamada UrbanPlan AI. "
+            "Tienes a tu disposicion un equipo especializado:\n\n"
+            "- 'agente_normativo': Experto en legislacion urbanistica, BOE y CTE. "
+            "Delégale preguntas sobre viabilidad legal, normativa de alturas, usos del suelo, accesibilidad, etc.\n"
+            "- 'agente_estimador': Experto en presupuestos y plazos historicos de obras. "
+            "Delégale preguntas sobre costes estimados, tasas de licencia o tiempos de tramitacion.\n"
+            "- 'generate_permit_dossier': Herramienta que genera un dossier oficial en Markdown. "
+            "Usala cuando el usuario pida el INFORME FINAL o DOSSIER del proyecto.\n\n"
+            "Flujo para un dossier completo:\n"
+            "1. Transfiere al agente_normativo para obtener la viabilidad legal.\n"
+            "2. Transfiere al agente_estimador para obtener costes y plazos.\n"
+            "3. Con ambas respuestas, llama a generate_permit_dossier para generar el archivo.\n"
+            "4. Informa al usuario de la ruta donde se ha guardado el documento.\n\n"
+            "Si el usuario hace una pregunta general de urbanismo, delegala al agente_normativo. "
+            "Si pregunta sobre presupuesto o plazos, delegala al agente_estimador."
         ),
-        tools=[tool_normativo, tool_estimador, mcp_dossier_tool]
+        tools=[generate_permit_dossier],
+        sub_agents=[normativo, estimador],
     )

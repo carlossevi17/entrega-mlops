@@ -11,8 +11,10 @@ dependencies = [
     "google-genai>=2.6.0",
     "jupyter>=1.1.1",
     "llama-index>=0.14.22",
+    "llama-index-embeddings-huggingface>=0.7.0",
     "llama-index-vector-stores-faiss>=0.6.0",
     "mcp>=1.27.1",
     "pydantic>=2.13.4",
     "pypdf>=6.12.2",
+    "python-dotenv>=1.2.2",
 ]

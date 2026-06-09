@@ -1,18 +1,19 @@
-# src/urbanplan/main.py
+# src/urbanplan/agent.py
 import os
+from dotenv import load_dotenv
 from urbanplan.supervisor.supervisor import create_supervisor
 
-# Cargar variables de entorno (simulando lo que haría dotenv o el propio ADK)
-PROVIDER = os.getenv("MODEL_PROVIDER", "gemini")
-PROJECT_ID = os.getenv("GOOGLE_CLOUD_PROJECT", "tu-proyecto-gcp-12345")
+# Cargar .env automaticamente
+load_dotenv()
 
-# Construir rutas absolutas seguras
-BASE_DIR = os.path.abspath(os.path.join(os.getcwd()))
-INDEX_PATH = os.path.join(BASE_DIR, "data", "vector_store")
+MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+PROJECT_ID = os.getenv("GOOGLE_CLOUD_PROJECT", "mlops-entrega")
 
-# Esta es la instancia que el ADK va a ejecutar
-agent = create_supervisor(
-    index_path=INDEX_PATH, 
-    bq_project_id=PROJECT_ID, 
-    provider=PROVIDER
+# Construir rutas absolutas
+BASE_DIR = os.path.abspath(os.getcwd())
+
+# ADK busca 'root_agent' — nombre obligatorio
+root_agent = create_supervisor(
+    bq_project_id=PROJECT_ID,
+    model=MODEL,
 )

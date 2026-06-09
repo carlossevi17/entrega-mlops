@@ -4,7 +4,8 @@ import re
 
 class BigQueryEstimatorTool:
     def __init__(self, project_id: str):
-        self.client = bigquery.Client(project=project_id)
+        # Aseguramos que la región sea EU, que es donde se creó el dataset
+        self.client = bigquery.Client(project=project_id, location="EU")
         
         # Límite obligatorio de bytes facturables para evitar costes descontrolados
         self.job_config = bigquery.QueryJobConfig(
