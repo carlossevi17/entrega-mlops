@@ -1,6 +1,6 @@
 # src/urbanplan/main.py
 import os
-from urbanplan.supervisor.agent import create_supervisor
+from urbanplan.supervisor.supervisor import create_supervisor
 
 # Cargar variables de entorno (simulando lo que haría dotenv o el propio ADK)
 PROVIDER = os.getenv("MODEL_PROVIDER", "gemini")

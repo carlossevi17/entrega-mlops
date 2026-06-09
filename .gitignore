@@ -1,34 +1,10 @@
-# Environments
-venv/
-.venv/
-env/
-
-# Python
+# Python-generated files
 __pycache__/
-*.py[cod]
-*$py.class
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
 
-# Jupyter
-.ipynb_checkpoints/
-
-# Environment variables
-.env
-.env.*
-!.env.example
-
-# Node
-node_modules/
-
-# OS generated files
-.DS_Store
-Thumbs.db
-
-# IDEs
-.vscode/
-.idea/
-
-# Data (ignoring data as it may contain private PDFs/info)
-data/
-
-# Logs
-*.log
+# Virtual environments
+.venv
