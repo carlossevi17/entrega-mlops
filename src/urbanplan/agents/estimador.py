@@ -1,6 +1,7 @@
 # src/urbanplan/agents/estimador.py
 from google.adk.agents import Agent
 from urbanplan.retrieval.bigquery import BigQueryEstimatorTool
+from urbanplan.mcp_server.dossier_tool import generate_permit_dossier
 
 
 def create_estimador_agent(bq_project_id: str, model: str = "gemini-2.5-flash") -> Agent:
@@ -42,8 +43,9 @@ def create_estimador_agent(bq_project_id: str, model: str = "gemini-2.5-flash") 
             "Ejemplo de consulta util: "
             "SELECT tipo_obra, AVG(tasa_licencia_euros) as tasa_media, AVG(dias_tramitacion) as dias_medios "
             "FROM `mlops-entrega.agente_urbanistico.licencias_historicas` "
-            "WHERE metros_cuadrados BETWEEN 200 AND 300 AND municipio = 'Barcelona' GROUP BY tipo_obra "
+            "WHERE metros_cuadrados BETWEEN 1000 AND 2000 AND municipio = 'Zaragoza' GROUP BY tipo_obra "
             "Si la consulta falla, proporciona una estimacion basada en el conocimiento del sector."
+            "\n\nMUY IMPORTANTE: Tienes acceso a la herramienta 'generate_permit_dossier'. Si el usuario pide un informe o dossier, ÚSALA para guardar los datos."
         ),
-        tools=[query_historical_data]
+        tools=[query_historical_data, generate_permit_dossier]
     )
